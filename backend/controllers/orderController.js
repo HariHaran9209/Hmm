@@ -42,7 +42,7 @@ export const acceptOrder = async (req, res) => {
     }
 }
 
-export const updateProgress = async (req, res) => {
+export const updateProgress = async (req, res, io) => {
     try {
         const { progress } = req.body
         const order = await Order.findById(req.params.id)
@@ -53,6 +53,8 @@ export const updateProgress = async (req, res) => {
         order.progress = progress
         if (progress === 100) order.status = 'completed'
         await order.save()
+
+        io.to(req.params.id).emit('progress_changed', { progress })
 
         res.json(order)
     } catch (err) {
