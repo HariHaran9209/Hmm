@@ -3,7 +3,18 @@ import { useState } from 'react'
 import Navbar from '../components/Navbar'
 
 export default function Dashboard() {
-  const [user] = useState(() => JSON.parse(localStorage.getItem('user')))
+  const [user] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    // If it's missing, null, or accidentally stored as the literal string "undefined"
+    if (!savedUser || savedUser === "undefined") {
+      return { id: '', name: '', role: '' };
+    }
+    try {
+      return JSON.parse(savedUser);
+    } catch (e) {
+      return { id: '', name: '', role: '' };
+    }
+  });
   const navigate = useNavigate()
 
   return (

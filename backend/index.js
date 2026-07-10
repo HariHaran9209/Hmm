@@ -16,11 +16,12 @@ dotenv.config()
 const app = express()
 const server = http.createServer(app)
 const io = new Server(server, {
-    cors: { origin: process.env.FRONTNED_URL, credentials: true }
+    cors: { origin: "https://zenora-x0ht.onrender.com", credentials: true }
 })
 
 app.use(cors({
-    origin: process.env.FRONTNED_URL,
+    origin: "https://zenora-x0ht.onrender.com",
+    methods: ["GET", "POST"],
     credentials: true
 }))
 app.use(express.json())

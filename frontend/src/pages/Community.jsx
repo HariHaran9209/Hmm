@@ -4,10 +4,24 @@ import toast from 'react-hot-toast'
 import { io } from 'socket.io-client'
 import Navbar from '../components/Navbar'
 
-const socket = io(import.meta.env.VITE_API_URL)
+const socket = io('https://zenora-backend-8sxs.onrender.com', {
+  transports: ['websocket', 'polling'],
+  withCredentials: true
+});
 
 export default function Community() {
-  const [user] = useState(() => JSON.parse(localStorage.getItem('user')) || { id: '', name: '', role: '' })
+  const [user] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    // If it's missing, null, or accidentally stored as the literal string "undefined"
+    if (!savedUser || savedUser === "undefined") {
+      return { id: '', name: '', role: '' };
+    }
+    try {
+      return JSON.parse(savedUser);
+    } catch (e) {
+      return { id: '', name: '', role: '' };
+    }
+  });
   const [posts, setPosts] = useState([])
   const [content, setContent] = useState('')
   const [commentText, setCommentText] = useState({})
