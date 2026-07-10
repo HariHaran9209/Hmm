@@ -10,7 +10,6 @@ import Post from './models/Post.js'
 import authRouter from './routes/auth.js'
 import orderRouter from './routes/orders.js'
 import postRouter from './routes/posts.js'
-import { timeStamp } from 'console'
 
 dotenv.config()
 
@@ -23,74 +22,85 @@ const io = new Server(server, {
 app.use(cors())
 app.use(express.json())
 
+// ✓ FIX: Merged into a single 'connection' block to keep event handling predictable
 io.on('connection', (socket) => {
-    socket.on('join_order', (orderId) => {
+    
+    // --- ORDER & CHAT EVENTS ---
+    socket.on('join_order', async (orderId) => {
         socket.join(orderId)
         console.log(`Socket ${socket.id} joined order ${orderId}`)
+
+        // Load chat history from DB
+        try {
+            const messages = await Message.find({ orderId }).sort({ createdAt: 1 })
+            socket.emit('chat_history', messages)
+        } catch (err) {
+            console.error('Error fetching chat history:', err)
+        }
     })
 
     socket.on('progress_update', ({ orderId, progress }) => {
         io.to(orderId).emit('progress_changed', { progress })
     })
 
-    socket.on('send_message', ({ orderId, sender, text }) => {
-        const message = { sender, text, timeStamp: new Date() }
-        io.to(orderId).emit('receive_message', message)
+    socket.on('send_message', async ({ orderId, sender, text }) => {
+        try {
+            const message = await Message.create({ orderId, sender, text })
+            io.to(orderId).emit('receive_message', message)
+        } catch (err) {
+            console.error('Error saving message:', err)
+        }
     })
 
-    socket.on('disconnect', () => {})
-
+    // --- COMMUNITY POST & COMMENT EVENTS ---
     socket.on('new_post', async ({ content, sender }) => {
-      try {
-        // 1. Save the post to the database
-        const post = await Post.create({ author: sender, content })
-        
-        // 2. Fetch it and properly await the population of user details
-        const populated = await Post.findById(post._id).populate('author', 'name role')
-        
-        // 3. Now it is a 100% complete object with name and role populated!
-        io.emit('post_created', populated) 
-      } catch (err) {
-        console.error("Error creating post via socket:", err.message)
-        socket.emit('post_error', { message: 'Failed to create post' })
-      }
+        try {
+            const post = await Post.create({ author: sender, content })
+            const populated = await post.populate('author', 'name role')
+            io.emit('post_created', populated)
+        } catch (err) {
+            console.error('Error creating post:', err)
+        }
     })
-})
 
-io.on('connection', (socket) => {
-  socket.on('join_order', async (orderId) => {
-    socket.join(orderId)
+    // ✓ FIX: Added the missing comment listener
+    socket.on('new_comment', async ({ postId, authorId, text }) => {
+        try {
+            // Find the post and push the comment into the subdocument array
+            const post = await Post.findById(postId)
+            if (!post) return;
 
-    // Load chat history from DB
-    const messages = await Message.find({ orderId }).sort({ createdAt: 1 })
-    socket.emit('chat_history', messages)
-  })
+            post.comments.push({
+                author: authorId,
+                text: text
+            })
 
-  socket.on('progress_update', ({ orderId, progress }) => {
-    io.to(orderId).emit('progress_changed', { progress })
-  })
+            await post.save()
 
-  socket.on('send_message', async ({ orderId, sender, text }) => {
-    // Save to DB
-    const message = await Message.create({ orderId, sender, text })
-    io.to(orderId).emit('receive_message', message)
-  })
+            // Crucial: Populate BOTH the post author AND the comment author
+            // so the frontend receives the full name and profile details
+            const populatedPost = await Post.findById(postId)
+                .populate('author', 'name role')
+                .populate('comments.author', 'name role')
 
-  socket.on('disconnect', () => {})
+            // Emit the fully updated post out to everyone
+            io.emit('comment_added', populatedPost)
+        } catch (err) {
+            console.error('Error adding comment:', err)
+        }
+    })
 
-  socket.on('new_post', async ({ content, sender }) => {
-    const post = await Post.create({ author: sender, content })
-    const populated = post.populate('author', 'name role')
-    io.emit('post_created', populated) // broadcast to everyone
-  })
+    socket.on('disconnect', () => {
+        console.log(`Socket disconnected: ${socket.id}`)
+    })
 }) 
 
-
-
+// Routes
 app.use('/api/auth', authRouter)
 app.use('/api/orders', orderRouter(io))
 app.use('/api/posts', postRouter)
 
+// Database Connection
 mongoose.connect(process.env.DB_URI)
     .then(() => server.listen(5000, () => console.log('Server running on port 5000')))
     .catch(err => console.log(err))
