@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 
 export default function Navbar() {
   const navigate = useNavigate()
-  const user = JSON.parse(localStorage.getItem('user'))
+  const savedUser = localStorage.getItem('user');
+  const user = savedUser && savedUser !== "undefined" ? JSON.parse(savedUser) : { name: 'User' };
   const [open, setOpen] = useState(false)
 
   const logout = () => {
