@@ -16,10 +16,13 @@ dotenv.config()
 const app = express()
 const server = http.createServer(app)
 const io = new Server(server, {
-    cors: { origin: '*' }
+    cors: { origin: process.env.FRONTNED_URL, credentials: true }
 })
 
-app.use(cors())
+app.use(cors({
+    origin: process.env.FRONTNED_URL,
+    credentials: true
+}))
 app.use(express.json())
 
 // ✓ FIX: Merged into a single 'connection' block to keep event handling predictable

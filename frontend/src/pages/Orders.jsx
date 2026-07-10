@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import { io } from 'socket.io-client'
 import Navbar from '../components/Navbar'
 
-const socket = io('http://localhost:5000')
+const socket = io(import.meta.env.VITE_API_URL)
 
 export default function Orders() {
   const [user] = useState(() => JSON.parse(localStorage.getItem('user')) || { role: '', name: '', id: '' })
