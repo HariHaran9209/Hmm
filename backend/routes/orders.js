@@ -6,7 +6,7 @@ const router = Router()
 
 export default (io) => {
   router.post('/', auth, createOrder)
-  router.get('/', auth, getOrders)
+  router.get('/', getOrders)
   router.put('/:id/accept', auth, acceptOrder)
   router.put('/:id/progress', auth, (req, res) => updateProgress(req, res, io))
 

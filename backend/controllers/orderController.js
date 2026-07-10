@@ -10,17 +10,28 @@ export const createOrder = async (req, res) => {
     }
 }
 
+// export const getOrders = async (req, res) => {
+//    try {
+//        const order = await Order.findById(req.params.id)
+//        if (!order) return res.status(404).json({ message: 'Order not found' })
+//        if (order.status !== 'open') return res.status(400).json({ message: 'Order already taken' })
+//        order.provider = req.user.id
+//        order.status = 'active'
+//        await order.save()
+
+//        res.json(order)
+//    } catch (err) {
+//        res.status(500).json({ message: err.message })
+//    }
+//}
+
 export const getOrders = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id)
-        if (!order) return res.status(404).json({ message: 'Order not found' })
-        if (order.status !== 'open') return res.status(400).json({ message: 'Order already taken' })
-
-        order.provider = req.user.id
-        order.status = 'active'
-        await order.save()
-
-        res.json(order)
+        // Fetch all orders from the database
+        // (You can also use Order.find({ status: 'open' }) if you only want available ones)
+        const orders = await Order.find() 
+        
+        res.json(orders)
     } catch (err) {
         res.status(500).json({ message: err.message })
     }

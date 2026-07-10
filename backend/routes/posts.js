@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import auth from '../middleware/auth.js'
-import { createPost, getPost, addComment } from '../controllers/postController.js'
+import { createPost, getPosts, addComment } from '../controllers/postController.js'
 
 const router = Router()
 
