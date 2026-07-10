@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Create a custom instance with the correct backend URL
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL 
+  baseURL: 'https://zenora-backend-8sxs.onrender.com' 
 })
 
 // Attach the interceptor to the custom API instance

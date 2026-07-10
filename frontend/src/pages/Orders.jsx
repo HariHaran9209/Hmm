@@ -7,7 +7,18 @@ import Navbar from '../components/Navbar'
 const socket = io(import.meta.env.VITE_API_URL)
 
 export default function Orders() {
-  const [user] = useState(() => JSON.parse(localStorage.getItem('user')) || { role: '', name: '', id: '' })
+  // Inside src/pages/Orders.jsx
+  const [user] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    if (!savedUser || savedUser === "undefined") {
+      return { id: '', name: '', role: '' }; // safe fallback object
+    }
+    try {
+      return JSON.parse(savedUser);
+    } catch (e) {
+      return { id: '', name: '', role: '' };
+    }
+  });
   const [orders, setOrders] = useState([])
   const [form, setForm] = useState({ title: '', description: '', budget: '' })
   const [activeOrder, setActiveOrder] = useState(null)
