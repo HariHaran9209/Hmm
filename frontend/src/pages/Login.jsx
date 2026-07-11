@@ -16,9 +16,12 @@ export default function Login() {
     try {
       const { data } = await axios.post('/api/auth/login', form)
       
-      console.log("Backend response structure:", data)
-      console.log("Is data defined?", !!data);
-      console.log("Stringified data:", JSON.stringify(data, null, 2));
+      console.log("--- DEBUG START ---")
+      console.log("Data keys:", Object.keys(data || {}))
+      console.log("Raw Token:", data?.token)
+      console.log("Raw User:", data?.user)
+      console.log("Stringified whole data payload:", JSON.stringify(data))
+      console.log("--- DEBUG END ---")
       
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
