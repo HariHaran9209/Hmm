@@ -21,7 +21,8 @@ const io = new Server(server, {
 
 app.use(cors({
     origin: "https://zenora-x0ht.onrender.com",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'], // Ensures custom auth headers pass through
     credentials: true
 }))
 app.use(express.json())
