@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
   const navigate = useNavigate()
+  axios.defaults.baseURL = 'https://zenora-backend-8sxs.onrender.com';
 
   const handleSubmit = async (e) => {
     // 1. PREVENT PAGE REFRESH
