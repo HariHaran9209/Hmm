@@ -10,6 +10,10 @@ export default function Login() {
   const handleSubmit = async () => {
     try {
       const { data } = await axios.post('/api/auth/login', form)
+      
+      // 1. ADD THIS TEMPORARILY TO INSPECT THE DATA:
+      console.log("Backend response structure:", data)
+      
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
       toast.success('Welcome back!')
