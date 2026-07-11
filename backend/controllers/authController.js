@@ -34,6 +34,10 @@ export const login = async (req, res) => {
 
         res.json({ token, user: { id: user._id, name: user.name, role: user.role } })
     } catch (err) {
-        res.status(500).json({ messages: err.message })
+        console.error("Axios Catch Error:", err)
+        // ADD THIS LINE to see the exact message the backend sent back:
+        console.log("Server Error Body Response:", err.response?.data) 
+        
+        toast.error(err.response?.data?.message || 'Invalid credentials')
     }
 }
