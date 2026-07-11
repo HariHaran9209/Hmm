@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 
+// Ahmm wtf
+
 export default function Navbar() {
   const navigate = useNavigate()
   const [user, setUser] = useState({ name: 'User', role: 'Guest' })
