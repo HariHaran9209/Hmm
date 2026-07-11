@@ -1,14 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 
 export default function Navbar() {
   const navigate = useNavigate()
-  const savedUser = localStorage.getItem('user');
-  const user = savedUser && savedUser !== "undefined" ? JSON.parse(savedUser) : { name: 'User' };
+  const [user, setUser] = useState({ name: 'User', role: 'Guest' })
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user')
+    if (savedUser && savedUser !== "undefined") {
+      try {
+        setUser(JSON.parse(savedUser))
+      } catch (e) {
+        console.error("Error parsing user from localStorage", e)
+      }
+    }
+  }, []) // Runs once when Navbar mounts
 
   const logout = () => {
     localStorage.clear()
+    setUser({ name: 'User', role: 'Guest' }) // Reset state immediately
     navigate('/login')
   }
 
@@ -41,7 +52,7 @@ export default function Navbar() {
           </div>
           <Link to="/orders" onClick={() => setOpen(false)} className="text-sm text-[#888888] hover:text-[#f1f1f1] transition-colors">Orders</Link>
           <Link to="/community" onClick={() => setOpen(false)} className="text-sm text-[#888888] hover:text-[#f1f1f1] transition-colors">Community</Link>
-          <button onClick={logout} className="text-sm text-[#e63946] text-left">Logout</button>
+          <button onClick={logout} className="text-sm text-[#e63946] text-left">Logout</button> 
         </div>
       )}
     </nav>
